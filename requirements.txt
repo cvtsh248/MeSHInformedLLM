@@ -3,3 +3,4 @@ httpx
 asyncio
 chromadb
 bioc
+ollama
