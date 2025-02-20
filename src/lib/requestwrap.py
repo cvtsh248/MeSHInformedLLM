@@ -1,7 +1,7 @@
 import asyncio
 import httpx
 
-async def get(url: str, headers={}):
+async def get(url: str, headers: dict={}) -> httpx.Response | None:
     '''
         Send get request to URL
     '''
