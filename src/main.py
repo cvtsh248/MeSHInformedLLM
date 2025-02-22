@@ -92,4 +92,4 @@ async def main(question):
     print(final_query["response"])
     return
 
-asyncio.run(main("Medications used in chronic kidney disease"))
+asyncio.run(main("Management of multi-organ failure in diabetic ketoacidocis"))

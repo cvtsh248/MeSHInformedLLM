@@ -114,4 +114,14 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     
     return (0,refined_query)
 
+# NIH books
+async def book_search(query: str) -> dict:
+    
+    '''
+    Function to use a mesh query to search for literature
+    Sadly we're limited by open access papers... 
+    '''
+
+    result = await requestwrap.get('''https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term='''+query+'''&retmode=json&retmax=30''', headers={"accept":"application/json"})
+    return result.json()
 # print(asyncio.run(MeSH_refiner(''''"Kidney Neoplasms" [MeSH] AND "Management" [MeSH]''')))
