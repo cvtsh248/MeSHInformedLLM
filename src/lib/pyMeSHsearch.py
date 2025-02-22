@@ -61,7 +61,7 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     #     return (1,"Please regenerate the query. You are missing the [MeSH] in your query")
     
 
-    keywords = re.findall(r'"([^"]*)"', query)
+    keywords = re.findall(r'"([^"]*)"', refined_query)
     print(keywords)
     if len(keywords) == 0:
         return (1,"Please regenerate the query. You are missing the keywords in your query")
@@ -86,7 +86,7 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     # print(confirmed_keywords)
     for keyword in keywords:
         if keyword in confirmed_keywords:
-            return (0,"") 
+            return (0,refined_query) 
 
     # Find the closest real keywords to hallucinated keywords using cosine similarity
     embed = embedding_functions.DefaultEmbeddingFunction()
