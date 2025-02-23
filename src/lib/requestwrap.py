@@ -2,7 +2,7 @@ import asyncio
 import httpx
 from httpx_retries import RetryTransport, Retry
 
-async def get(url: str, headers: dict={}) -> httpx.Response | None:
+async def get(url: str, headers: dict={}) -> httpx.Response:
     '''
         Send get request to URL
     '''
