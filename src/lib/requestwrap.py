@@ -1,12 +1,13 @@
 import asyncio
 import httpx
+from httpx_retries import RetryTransport, Retry
 
 async def get(url: str, headers: dict={}) -> httpx.Response | None:
     '''
         Send get request to URL
     '''
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(transport=RetryTransport()) as client:
             req = await client.get(url, headers=headers)
             return req
     except httpx.RequestError as e:

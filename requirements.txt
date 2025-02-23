@@ -4,3 +4,4 @@ asyncio
 chromadb
 bioc
 ollama
+httpx-retries
