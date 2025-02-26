@@ -20,19 +20,14 @@ def get_paper_info(xml_string):
             paper_data["ID"] = id_element.text
 
         # Extract DOI
-        doi_element = document.find('.//infon[@key="doi"]')
+        doi_element = document.find('.//infon[@key="article-id_doi"]')
         if doi_element is not None:
             paper_data["DOI"] = doi_element.text
 
-        # Extract Title
-        title_element = document.find('.//passage/infon[@key="title"]')
-        if title_element is not None:
-            paper_data["Title"] = title_element.text
-
         # Extract Authors
-        authors_element = document.find('.//passage/infon[@key="authors"]')
+        authors_element = document.find('.//passage/infon[@key="name_0"]')
         if authors_element is not None:
-            paper_data["Authors"] = authors_element.text
+            paper_data["First author"] = authors_element.text
 
         papers.append(paper_data)
 

@@ -42,6 +42,8 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     If the query does not need to be modified, a tuple with 2 in index 0 will be returned, along with "" in index position 2
     '''
 
+    print("Processing mesh queries")
+
     keyword_chars = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm,1234567890"
     mesh = re.findall(r"\[([^\]]*)\]", query)
     
@@ -53,7 +55,7 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     refined_query = refined_query.replace('''"MeSH"''', "MeSH")
     refined_query = re.sub(r'"\[', '" [', refined_query)
 
-    print([x.lower() for x in mesh])
+    # print([x.lower() for x in mesh])
     if "mesh" not in [x.lower() for x in mesh] and '''"mesh"''' not in [x.lower() for x in mesh]:
         return (1,"Please regenerate the query. You are missing the [MeSH] in your query")
         
@@ -62,7 +64,7 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     
 
     keywords = re.findall(r'"([^"]*)"', refined_query)
-    print(keywords)
+    # print(keywords)
     if len(keywords) == 0:
         return (1,"Please regenerate the query. You are missing the keywords in your query")
 
@@ -70,6 +72,7 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     flipped_keywords = [" ".join(reversed(x.split(" "))) for x in keywords] # because the nih api is stupid and for some dumb reason is dependent on word order...
     seperated_words = [x for y in keywords for x in y.split(" ")] # maximise search radius
 
+    print("Confirming existence of LLM generated MeSH terms")
     confirmed_keywords = await find_MeSH(keywords) + await find_MeSH(flipped_keywords) + await find_MeSH(seperated_words)
 
     confirmed_keywords = [item for item in confirmed_keywords if item != []]
@@ -86,6 +89,7 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     # print(confirmed_keywords)
     for keyword in keywords:
         if keyword in confirmed_keywords:
+            print("Query: "+refined_query)
             return (0,refined_query) 
 
     # Find the closest real keywords to hallucinated keywords using cosine similarity
@@ -96,6 +100,8 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
     vectorised_confirmed_keywords = embed(confirmed_keywords)
 
     distances: list[list] = []
+
+    print("Fitting best MeSH keywords to queries")
     for i in vectorised_keywords:
         buffer = []
         for j in vectorised_confirmed_keywords:
@@ -111,7 +117,8 @@ async def MeSH_refiner(query: str) -> tuple[int, str]:
 
     for count, keyword in enumerate(corrected_keywords):
         refined_query = refined_query.replace(keywords[count], keyword)
-    
+        
+    print("Query: "+refined_query)
     return (0,refined_query)
 
 # NIH books
