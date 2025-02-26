@@ -6,10 +6,10 @@ import ollama
 
 async def generate_MeSH_response(question: str) -> dict[str: "response", dict: "sources", str: "papers"]:
 
-    MeSHgen_prompt_broad = '''You are an expert in medical information retrieval and MeSH (Medical Subject Headings) terminology. Your task is to generate three structured MeSH queries based on a given clinical question. Try to make them broad.
+    MeSHgen_prompt_broad = '''You are an expert in medical information retrieval and MeSH (Medical Subject Headings) terminology. Your task is to generate three structured MeSH queries based on a given clinical question. Try to make them broad and do NOT make them overly specific. Try to avoid using more than 4 MeSH terms.
                                 Instructions:
                                     1. Identify Key Concepts: Extract relevant medical concepts from the input question.
-                                    2. Map to MeSH Terms: Convert each concept into appropriate MeSH terms and subheadings.
+                                    2. Map to MeSH Terms: Convert each concept into appropriate MeSH terms and subheadings. Avoid using more than four MeSH terms.
                                     3. Construct a MeSH Query Using Standard Syntax:
                                         a. Use "MeSH Term"[MeSH] for direct searches.
                                         b. Add subheadings when necessary: "MeSH Term/Subheading"[MeSH].
@@ -48,10 +48,10 @@ async def generate_MeSH_response(question: str) -> dict[str: "response", dict: "
     # await pyMeSHsearch.find_MeSH()
     filtered_literature = []
     filtered_ids = []
-    print(MeSH_querylist)
+    # print(MeSH_querylist)
     for query in MeSH_querylist:
         papers = await pyMeSHsearch.lit_search(query)
-        print(papers)
+        # print(papers)
         literature = await asyncio.gather(*(pyMeSHsearch.find_paper(id) for id in papers["esearchresult"]["idlist"]))
         for count, item in enumerate(literature):
             if '[Error] : No result can be found.' not in item:
@@ -68,6 +68,8 @@ async def generate_MeSH_response(question: str) -> dict[str: "response", dict: "
         text = parsebioc.extract_text(paper)
         metadata = parsebioc.get_paper_info(paper)
         metadata[0]["Title"] = text[0]
+        # if len(metadata[0]["Title"]) < 2:
+        #     metadata[0]["Title"] = text
         documents.append(text)
         document_metadata.append(metadata)
         # documents += [elem.text for elem in root.iter('text')]
