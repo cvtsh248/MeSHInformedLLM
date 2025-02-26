@@ -1,129 +1,138 @@
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
 import tkinter as tk
 
-is_recording = False
+
+def get_medical_papers(query):
+   
+    papers = [
+        {
+            "title": "The Effects of Medication A on Disease B",
+            "authors": "Smith J, Doe A",
+            "journal": "Medical Journal",
+            "year": "2022",
+            "abstract": "Study on Medication A and Disease B..."
+        },
+        {
+            "title": "A Comprehensive Review of Treatment C",
+            "authors": "Brown C, Lee D",
+            "journal": "Health Science Reviews",
+            "year": "2021",
+            "abstract": "Review of treatments for condition C..."
+        }
+    ]
+    if not query:
+        return []
+    return [p for p in papers if query.lower() in p["title"].lower()]
+
+class ScrollableFrame(tb.Frame):
+    def __init__(self, container, **kwargs):
+        super().__init__(container, **kwargs)
+        canvas = tk.Canvas(self, bg="#2E2E2E", highlightthickness=0)
+        scrollbar = tb.Scrollbar(self, orient="vertical", command=canvas.yview)
+
+        self.scrollable_frame = tb.Frame(canvas)
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
 
 
-# Speech-to-Text Service
+def search_papers():
+    
+    references_text.config(state="normal")
+    references_text.delete("1.0", "end")
 
+    query = query_entry.get().strip()
+    results = get_medical_papers(query)
 
-def my_speech_to_text_service(audio_data):
-    """
-    This function would send the captured audio (audio_data) to your
-    custom STT service and return the recognized text.
-
-    For demonstration, we simulate this by returning fixed text.
-    """
-    return "Patient said: 'I feel unwell'"
-
-
-# AI Translator Service
-
-
-def my_ai_translator_service(recognized_text):
-    """
-    This function would translate the recognized text (using AI)
-    into the desired medical terms or format.
-
-    For demonstration, we simply convert the text to uppercase.
-    """
-    return recognized_text.upper()
-
-
-# Text-to-Speech Service
-
-
-def my_text_to_speech_service(text):
-    """
-    This function would take text (the doctor's response) and
-    convert it into speech in the desired dialect.
-
-    For demonstration, we simulate this by returning a message.
-    """
-    return "Playing back in dialect: " + text
-
-
-# Function to Toggle Recording On/Off
-
-
-def toggle_recording():
-    global is_recording
-    if not is_recording:
-        # --- Start Recording ---
-        is_recording = True
-        record_button.config(text="Stop Recording")
-        output_text.delete("1.0", tk.END)
-        output_text.insert(tk.END, "Recording started...\n")
-        # Here, you would add code to start capturing audio from the microphone.
+    if not results:
+        references_text.insert("end", "No references found.\n")
     else:
-        # --- Stop Recording ---
-        is_recording = False
-        record_button.config(text="Start Recording")
-        # Here, you would stop capturing audio.
-        # For demonstration, we simulate captured audio data:
-        audio_data = "Simulated Audio Data"
+        references_text.insert("end", "Papers referenced:\n\n")
+        for paper in results:
+            references_text.insert("end", f"• {paper['title']}\n")
 
-        # Convert the audio to text using your STT service.
-        recognized_text = my_speech_to_text_service(audio_data)
-        # Translate the recognized text with your AI translator.
-        translated_text = my_ai_translator_service(recognized_text)
-
-        # Display the recognized and translated text.
-        output_text.insert(tk.END, "\nRecognized Text:\n" + recognized_text + "\n")
-        output_text.insert(tk.END, "\nTranslated Text:\n" + translated_text + "\n")
+    references_text.config(state="disabled")
+    status_bar.config(text="Search complete.")
 
 
-# Function to Translate Doctor's Response to Dialect Speech
+root = tb.Window(themename="darkly")
+root.title("Medical Papers Search")
+root.geometry("900x700")
+root.configure(background="#2E2E2E")
 
+# Header
+header_frame = tb.Frame(root, padding=20)
+header_frame.pack(side="top", fill="x")
 
-def translate_response():
-    # Get the doctor's typed response.
-    doctor_response = doctor_text.get("1.0", tk.END).strip()
-    if doctor_response:
-        # Convert the text to dialect speech using your TTS service.
-        tts_result = my_text_to_speech_service(doctor_response)
-        # Display a message indicating the TTS result.
-        response_output.delete("1.0", tk.END)
-        response_output.insert(tk.END, tts_result)
-    else:
-        response_output.delete("1.0", tk.END)
-        response_output.insert(tk.END, "Please type a response.")
-
-
-# Tkinter
-
-root = tk.Tk()
-root.title("Speech Translator with Recording and TTS")
-root.geometry("600x500")
-
-# Patient Speech
-patient_label = tk.Label(root, text="Patient Speech:")
-patient_label.pack()
-
-# Button to toggle start/stop recording.
-record_button = tk.Button(root, text="Start Recording", command=toggle_recording)
-record_button.pack(pady=5)
-
-# Text widget to display the recognized and translated text.
-output_text = tk.Text(root, height=10, width=70)
-output_text.pack(pady=5)
-
-# Section for Doctor's Response
-doctor_label = tk.Label(root, text="Doctor's Response:")
-doctor_label.pack()
-
-# Text widget where the doctor can type his/her response.
-doctor_text = tk.Text(root, height=5, width=70)
-doctor_text.pack(pady=5)
-
-# Button to translate the doctor's response to dialect speech.
-translate_button = tk.Button(
-    root, text="Translate Response to Dialect Speech", command=translate_response
+header_label = tb.Label(
+    header_frame,
+    text="Medical Research Papers",
+    font=("Helvetica", 18, "bold"),
+    bootstyle="info"
 )
-translate_button.pack(pady=5)
+header_label.pack(anchor="center")
 
-# Text widget to display the TTS result (or a message indicating playback).
-response_output = tk.Text(root, height=5, width=70)
-response_output.pack(pady=5)
+separator = tb.Separator(root, orient="horizontal")
+separator.pack(fill="x", padx=20, pady=(0,20))
 
+# Top frame: Search Bar
+top_frame = tb.Frame(root, padding=10)
+top_frame.pack(side="top", fill="x", padx=20)
+
+query_label = tb.Label(top_frame, text="Enter your medical query:")
+query_label.pack(side="left", padx=(0,10))
+
+query_entry = tb.Entry(top_frame, width=50)
+query_entry.pack(side="left", fill="x", expand=True)
+
+search_button = tb.Button(top_frame, text="Search", command=search_papers, bootstyle="primary")
+search_button.pack(side="left", padx=(10,0))
+
+# Main Content: Two Columns
+content_frame = tb.Frame(root)
+content_frame.pack(side="top", fill="both", expand=True, padx=20, pady=10)
+
+# Left column: Blank
+left_frame = tb.Frame(content_frame)
+left_frame.pack(side="left", fill="both", expand=True, padx=(0,10))
+
+# A scrollable frame that we do NOT fill
+results_container = ScrollableFrame(left_frame)
+results_container.pack(fill="both", expand=True)
+
+# Right column: Papers Referenced
+right_frame = tb.Frame(content_frame)
+right_frame.pack(side="left", fill="both", expand=True, padx=(10,0))
+
+references_label = tb.Label(
+    right_frame,
+    text="References",
+    font=("Helvetica", 14, "bold"),
+    bootstyle="info"
+)
+references_label.pack(anchor="nw", pady=(0,5))
+
+references_text = tb.Text(
+    right_frame,
+    wrap="word",
+    relief="flat",
+    background="#1E1E1E",
+    foreground="#FFFFFF",
+    insertbackground="#FFFFFF"
+)
+references_text.pack(fill="both", expand=True)
+references_text.config(state="disabled")
+
+# Status Bar
+status_bar = tb.Label(root, text="Ready", anchor="w", padding=5)
+status_bar.pack(side="bottom", fill="x")
 
 root.mainloop()
