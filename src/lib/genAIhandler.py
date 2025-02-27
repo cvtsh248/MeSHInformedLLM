@@ -6,16 +6,14 @@ import ollama
 
 async def generate_MeSH_response(question: str) -> dict[str: "response", dict: "sources", str: "papers"]:
 
-    MeSHgen_prompt_broad = '''You are an expert in medical information retrieval and MeSH (Medical Subject Headings) terminology. Your task is to generate three structured MeSH queries based on a given clinical question. Try to make them broad and do NOT make them overly specific. Try to avoid using more than 4 MeSH terms.
+    MeSHgen_prompt_broad = '''You are an expert in medical information retrieval and MeSH (Medical Subject Headings) terminology. Your task is to generate three structured MeSH queries based on a given clinical question. Try to make them broad and do not make them overly specific.
                                 Instructions:
                                     1. Identify Key Concepts: Extract relevant medical concepts from the input question.
-                                    2. Map to MeSH Terms: Convert each concept into appropriate MeSH terms and subheadings. Avoid using more than four MeSH terms.
+                                    2. Map to MeSH Terms: Convert each concept into appropriate MeSH terms and subheadings. Avoid using more than three MeSH terms. Keep it broad.
                                     3. Construct a MeSH Query Using Standard Syntax:
                                         a. Use "MeSH Term"[MeSH] for direct searches.
                                         b. Add subheadings when necessary: "MeSH Term/Subheading"[MeSH].
-                                        c. Use Boolean operators (AND, OR, NOT) to refine the query. Try to avoid using AND unless it is necessary, so as to maximise the literature found.
-                                        d. If necessary, include "Term"[TIAB] to search titles and abstracts when MeSH indexing is unavailable.
-                                        e. Use "MeSH:noexp" if a term should not include narrower concepts.
+                                        c. Use Boolean operators (AND, OR, NOT) to refine the query. Try to avoid using AND unless it is necessary, so as to maximise the literature search.
                                     4. Format Output as a Structured MeSH Query: Ensure clarity and logical structure.
                             Only return the three MeSH queries, each deliminated by a newline. Do not return any other messages. An example of acceptable output would be as follows:
 
@@ -51,7 +49,7 @@ async def generate_MeSH_response(question: str) -> dict[str: "response", dict: "
     # print(MeSH_querylist)
     for query in MeSH_querylist:
         papers = await pyMeSHsearch.lit_search(query)
-        # print(papers)
+        print(papers)
         literature = await asyncio.gather(*(pyMeSHsearch.find_paper(id) for id in papers["esearchresult"]["idlist"]))
         for count, item in enumerate(literature):
             if '[Error] : No result can be found.' not in item:
