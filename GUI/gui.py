@@ -1,7 +1,7 @@
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 import tkinter as tk
-
+from src.lib import genAIhandler
 
 def get_medical_papers(query):
    
