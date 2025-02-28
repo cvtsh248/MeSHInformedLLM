@@ -5,6 +5,8 @@ from lib import genAIhandler
 import asyncio
 from async_tkinter_loop import async_handler, async_mainloop
 
+chat_history = []
+
 def get_medical_papers(query):
    
     papers = [
@@ -45,30 +47,53 @@ class ScrollableFrame(tb.Frame):
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-
 async def search_papers():
     
     references_text.config(state="normal")
-    references_text.delete("1.0", "end")
+    chat_text.config(state="normal")
 
+    results = []
     query = query_entry.get().strip()
-    # results = get_medical_papers(query)
-    print(query)
-    results = await genAIhandler.generate_MeSH_response(query)
 
-    # if not results:
-    #     references_text.insert("end", "No references found.\n")
-    # else:
-    #     references_text.insert("end", "Papers referenced:\n\n")
-    #     for paper in results:
-    #         references_text.insert("end", f"• {paper['title']}\n")
+    if chat_history == []:
+        references_text.delete("1.0", "end")
+        chat_text.delete("1.0", "end")
+    
+        # references_text.config(state="disabled")
+        # chat_text.config(state="disabled")
 
-    references_text.config(state="disabled")
-    status_bar.config(text="Search complete.")
+        status_bar.config(text="Searching...")
+
+        
+        # results = get_medical_papers(query)
+        chat_text.insert("end", "Please wait a moment. Generating MeSH queries and searching MeSH databases for answers to your query. May take up to 2 minutes.")
+        print(chat_text.tk)
+        # root.update()
+
+        results = await genAIhandler.generate_MeSH_response(query)
+
+        if not results:
+            references_text.insert("end", "No references found.\n")
+        else:
+            references_text.insert("end", "Papers referenced:\n\n")
+            chat_text.insert("end", "\n\nResponse based on research:\n")
+            chat_history.append("MeSH expert: " + results["response"])
+            chat_text.insert("end", results["response"])
+            for paper in results['sources']:
+                references_text.insert("end", f"• {"DOI: "+paper["DOI"]+", Authors: "+paper["First author"].split("surname:")[1].split(";")[0]+" et al."}\n")
+
+        status_bar.config(text="Search complete.")
+    else:
+        status_bar.config(text="Thinking...")
+        new_result = await genAIhandler.general_chat(query, "\n".join(chat_history), "\n".join(results["papers"]))
+        chat_history.append("User: "+query)
+        chat_history.append("MeSH expert: "+new_result["response"])
+        chat_text.insert("end", new_result["response"])
+        status_bar.config(text="Done.")
 
 
 root = tb.Window(themename="darkly")
-root.title("Medical Papers Search")
+root.title("MeSH augmented LLM")
 root.geometry("900x700")
 root.configure(background="#2E2E2E")
 
@@ -78,7 +103,7 @@ header_frame.pack(side="top", fill="x")
 
 header_label = tb.Label(
     header_frame,
-    text="Medical Research Papers",
+    text="MeSH augmented LLM",
     font=("Helvetica", 18, "bold"),
     bootstyle="info"
 )
@@ -91,30 +116,56 @@ separator.pack(fill="x", padx=20, pady=(0,20))
 top_frame = tb.Frame(root, padding=10)
 top_frame.pack(side="top", fill="x", padx=20)
 
-query_label = tb.Label(top_frame, text="Enter your medical query:")
+query_label = tb.Label(top_frame, text="Query:")
 query_label.pack(side="left", padx=(0,10))
 
 query_entry = tb.Entry(top_frame, width=50)
 query_entry.pack(side="left", fill="x", expand=True)
 
-search_button = tb.Button(top_frame, text="Search", command=async_handler(search_papers), bootstyle="primary")
+search_button = tb.Button(top_frame, text="Submit", command=async_handler(search_papers), bootstyle="primary")
 search_button.pack(side="left", padx=(10,0))
 
 # Main Content: Two Columns
 content_frame = tb.Frame(root)
 content_frame.pack(side="top", fill="both", expand=True, padx=20, pady=10)
 
-# Left column: Blank
+content_frame.columnconfigure(0, weight=1)
+content_frame.columnconfigure(1, weight=1)
+content_frame.rowconfigure(0, weight=1)  
+
+# Left column: Chat response
 left_frame = tb.Frame(content_frame)
-left_frame.pack(side="left", fill="both", expand=True, padx=(0,10))
+left_frame.grid(row=0, column=0, sticky="nsew", padx=(10, 10), pady=10)
+left_frame.rowconfigure(1, weight=1)
+
+chat_label = tb.Label(
+    left_frame,
+    text="Response",
+    font=("Helvetica", 14, "bold"),
+    bootstyle="info"
+)
+chat_label.pack(anchor="nw", pady=(0,5))
+
+chat_text = tb.Text(
+    left_frame,
+    wrap="word",
+    relief="flat",
+    background="#1E1E1E",
+    foreground="#FFFFFF",
+    insertbackground="#FFFFFF"
+)
+chat_text.pack(fill="both", expand=True)
+chat_text.config(state="disabled")
+
 
 # A scrollable frame that we do NOT fill
-results_container = ScrollableFrame(left_frame)
-results_container.pack(fill="both", expand=True)
+# results_container = ScrollableFrame(left_frame)
+# results_container.pack(fill="both", expand=True, padx=(10,0))
 
 # Right column: Papers Referenced
 right_frame = tb.Frame(content_frame)
-right_frame.pack(side="left", fill="both", expand=True, padx=(10,0))
+right_frame.grid(row=0, column=1, sticky="nsew", padx=(10, 10), pady=10)
+right_frame.rowconfigure(1, weight=1)
 
 references_label = tb.Label(
     right_frame,

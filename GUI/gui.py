@@ -1,7 +1,7 @@
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 import tkinter as tk
-from src.lib import genAIhandler
+# from src.lib import genAIhandler
 import asyncio
 
 def get_medical_papers(query):
@@ -51,8 +51,8 @@ def search_papers():
     references_text.delete("1.0", "end")
 
     query = query_entry.get().strip()
-    # results = get_medical_papers(query)
-    results = asyncio.run(genAIhandler.generate_MeSH_response(query))
+    results = get_medical_papers(query)
+    # results = asyncio.run(genAIhandler.generate_MeSH_response(query))
 
     if not results:
         references_text.insert("end", "No references found.\n")
