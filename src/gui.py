@@ -1,8 +1,9 @@
 import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 import tkinter as tk
-from src.lib import genAIhandler
+from lib import genAIhandler
 import asyncio
+from async_tkinter_loop import async_handler, async_mainloop
 
 def get_medical_papers(query):
    
@@ -45,21 +46,22 @@ class ScrollableFrame(tb.Frame):
         scrollbar.pack(side="right", fill="y")
 
 
-def search_papers():
+async def search_papers():
     
     references_text.config(state="normal")
     references_text.delete("1.0", "end")
 
     query = query_entry.get().strip()
     # results = get_medical_papers(query)
-    results = asyncio.run(genAIhandler.generate_MeSH_response(query))
+    print(query)
+    results = await genAIhandler.generate_MeSH_response(query)
 
-    if not results:
-        references_text.insert("end", "No references found.\n")
-    else:
-        references_text.insert("end", "Papers referenced:\n\n")
-        for paper in results:
-            references_text.insert("end", f"• {paper['title']}\n")
+    # if not results:
+    #     references_text.insert("end", "No references found.\n")
+    # else:
+    #     references_text.insert("end", "Papers referenced:\n\n")
+    #     for paper in results:
+    #         references_text.insert("end", f"• {paper['title']}\n")
 
     references_text.config(state="disabled")
     status_bar.config(text="Search complete.")
@@ -95,7 +97,7 @@ query_label.pack(side="left", padx=(0,10))
 query_entry = tb.Entry(top_frame, width=50)
 query_entry.pack(side="left", fill="x", expand=True)
 
-search_button = tb.Button(top_frame, text="Search", command=search_papers, bootstyle="primary")
+search_button = tb.Button(top_frame, text="Search", command=async_handler(search_papers), bootstyle="primary")
 search_button.pack(side="left", padx=(10,0))
 
 # Main Content: Two Columns
@@ -137,4 +139,4 @@ references_text.config(state="disabled")
 status_bar = tb.Label(root, text="Ready", anchor="w", padding=5)
 status_bar.pack(side="bottom", fill="x")
 
-root.mainloop()
+async_mainloop(root)

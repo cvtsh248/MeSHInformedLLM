@@ -6,3 +6,4 @@ bioc
 ollama
 httpx-retries
 ttkbootstrap
+async-tkinter-loop
