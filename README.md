@@ -8,3 +8,25 @@ The flow of the solution is as such:
 4. The PubMed PMC API is queried with the refined query, and up to 30 papers are returned.
 5. The top 4 most relevant papers will then be selected with cosine similarity to the original question.
 6. The LLM will generate an answer based on the papers pulled
+
+# Python Dependencies
+* requests
+* httpx
+* asyncio
+* chromadb
+* bioc
+* ollama
+* httpx-retries
+* ttkbootstrap
+* async-tkinter-loop
+* ollama
+
+# Running the program
+After initialising a virtual environment run the following to install dependencies:
+```python3 -m pip install -r requirements.txt```
+
+Run the GUI via:
+```python3 src/gui.py```
+
+Alternatively you can run an interactive terminal version that allows you to chat with the LLM after it has generated your answer (feature will be added to GUI later):
+```python3 src/interactive.py```
