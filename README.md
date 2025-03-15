@@ -22,6 +22,8 @@ The flow of the solution is as such:
 * ollama
 
 # Running the program
+Ensure you have Ollama running in the background, with llama3.2 3b installed.
+
 After initialising a virtual environment run the following to install dependencies:
 ```python3 -m pip install -r requirements.txt```
 
