@@ -25,9 +25,11 @@ The flow of the solution is as such:
 Ensure you have Ollama running in the background, with llama3.2 3b installed.
 
 After initialising a virtual environment run the following to install dependencies:
+
 ```python3 -m pip install -r requirements.txt```
 
 Run the GUI via:
+
 ```python3 src/gui.py```
 
 Alternatively you can run an interactive terminal version that allows you to chat with the LLM after it has generated your answer (feature will be added to GUI later):
