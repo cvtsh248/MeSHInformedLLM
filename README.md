@@ -33,4 +33,5 @@ Run the GUI via:
 ```python3 src/gui.py```
 
 Alternatively you can run an interactive terminal version that allows you to chat with the LLM after it has generated your answer (feature will be added to GUI later):
+
 ```python3 src/interactive.py```
