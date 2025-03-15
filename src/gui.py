@@ -93,7 +93,7 @@ async def search_papers():
 
 
 root = tb.Window(themename="darkly")
-root.title("MeSH augmented LLM")
+root.title("SOPHIA AI")
 root.geometry("900x700")
 root.configure(background="#2E2E2E")
 
@@ -103,7 +103,7 @@ header_frame.pack(side="top", fill="x")
 
 header_label = tb.Label(
     header_frame,
-    text="MeSH augmented LLM",
+    text="SOPHIA AI",
     font=("Helvetica", 18, "bold"),
     bootstyle="info"
 )
